@@ -11,7 +11,10 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
     const supabaseUrl = 'https://jdtkyapuzowluikcwixg.supabase.co';
-    const supabaseKey = 'YOUR_ANON_KEY_HERE'; // <-- Replace this
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkdGt5YXB1em93bHVpa2N3aXhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5OTkxMzMsImV4cCI6MjA2NjU3NTEzM30.ZCb4XlRZvVUv2VbtOB-xDFk3gTSFGaQLAMCt5VVs1JA
+
+
+'; // <-- Replace this
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     async function loadQRCodes() {
