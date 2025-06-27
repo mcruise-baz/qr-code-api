@@ -19,7 +19,7 @@ export default async function handler(req, res) {
       width: dpi === 300 ? 1000 : 300,
       margin: 1,
       color: {
-        dark: '#000',
+        dark: '#191919',
         light: '#0000' // Transparent
       }
     })
