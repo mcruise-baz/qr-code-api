@@ -3,6 +3,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
 <form id="qrForm">
   <label>
     Name:<br>
@@ -30,65 +31,57 @@
   <h3>Preview:</h3>
   <img id="qrImage" src="" alt="QR Code" style="max-width:300px;" />
   <br>
-  <a id="saveButton" download="qr-code.png" style="display:inline-block; margin-top:10px; background:#000; color:#fff; padding:10px; text-decoration:none;">Download QR Code</a>
+  <a id="downloadBtn" download="qr-code.png" style="display:none; margin-top:10px; background:#000; color:#fff; padding:10px; text-decoration:none;">Download QR Code</a>
 </div>
   
 <div id="message"></div>
 
-  <script>
+<script>
   // Initialize Supabase client
-  const supabaseUrl = 'https://YOUR_SUPABASE_URL.supabase.co';
-  const supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
-
+  const supabaseUrl = 'https://jdtkyapuzowluikcwixg.supabase.co';
+  const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkdGt5YXB1em93bHVpa2N3aXhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5OTkxMzMsImV4cCI6MjA2NjU3NTEzM30.ZCb4XlRZvVUv2VbtOB-xDFk3gTSFGaQLAMCt5VVs1JA';
   const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-  // Handle form submission
   const form = document.getElementById('qrForm');
+  const qrPreview = document.getElementById('qrPreview');
+  const qrImage = document.getElementById('qrImage');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const messageDiv = document.getElementById('message');
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    messageDiv.textContent = '';
 
-    const name = form.name.value;
-    const target_url = form.target_url.value;
+    const name = form.name.value.trim();
+    const target_url = form.target_url.value.trim();
     const dpi = form.dpi.value;
 
+    // Insert into Supabase
     const { data, error } = await supabase
-      .from('qr_codes')  // or whatever your table is called
+      .from('qr_codes')
       .insert([{ name, target_url, dpi }]);
 
     if (error) {
-      alert('Error creating QR code: ' + error.message);
-    } else {
-      alert('QR code created successfully!');
-      form.reset();
+      messageDiv.style.color = 'red';
+      messageDiv.textContent = 'Error creating QR code: ' + error.message;
+      return;
     }
+
+    messageDiv.style.color = 'green';
+    messageDiv.textContent = 'QR code created successfully!';
+
+    // Reset form
+    form.reset();
+
+    // Generate QR code URL (your Vercel API endpoint)
+    const qrUrl = `/api/qr?code=${encodeURIComponent(target_url)}&dpi=${dpi}&bgcolor=ffffff`;
+
+    // Show preview and download button
+    qrImage.src = qrUrl;
+    downloadBtn.href = qrUrl;
+    qrPreview.style.display = 'block';
+    downloadBtn.style.display = 'inline-block';
   });
-</script>
-
-  <script>
-document.getElementById("qr-form").addEventListener("submit", async function(e) {
-  e.preventDefault();
-
-  const name = document.getElementById("qr-name").value;
-  const target_url = document.getElementById("qr-link").value;
-
-  const response = await fetch("/api/create", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ name, target_url })
-  });
-
-  const result = await response.json();
-
-  if (response.ok) {
-    alert("QR Code saved to database!");
-    // Optional: Redirect or clear form
-  } else {
-    alert("Error: " + result.error);
-  }
-});
 </script>
 
 </body>
