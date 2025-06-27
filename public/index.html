@@ -1,0 +1,42 @@
+<form id="qrForm">
+  <label>
+    Name:<br>
+    <input type="text" name="name" required />
+  </label><br><br>
+  
+  <label>
+    URL:<br>
+    <input type="url" name="target_url" required />
+  </label><br><br>
+  
+  <button type="submit">Create QR Code</button>
+</form>
+
+<div id="message"></div>
+
+<script>
+  const form = document.getElementById('qrForm');
+  const messageDiv = document.getElementById('message');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    const data = {
+      name: formData.get('name'),
+      target_url: formData.get('target_url'),
+      dpi: 72,           // default dpi, you can add input later
+      image_format: 'png' // default format
+    };
+
+    try {
+      // Call your Supabase insert function here
+      // We'll build this next!
+
+      messageDiv.textContent = 'QR code created!';
+      form.reset();
+    } catch (error) {
+      messageDiv.textContent = 'Error creating QR code: ' + error.message;
+    }
+  });
+</script>
