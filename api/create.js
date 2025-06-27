@@ -1,28 +1,34 @@
-import { createClient } from '@supabase/supabase-js';
+document.getElementById('qrForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
 
-const supabaseUrl = 'https://jdtkyapuzowluikcwixg.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkdGt5YXB1em93bHVpa2N3aXhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5OTkxMzMsImV4cCI6MjA2NjU3NTEzM30.ZCb4XlRZvVUv2VbtOB-xDFk3gTSFGaQLAMCt5VVs1JA';
+  const form = e.target;
+  const name = form.name.value;
+  const target_url = form.target_url.value;
+  const dpi = form.dpi.value;
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+  // Build QR code preview URL
+  const qrUrl = `/api/qr?code=${encodeURIComponent(target_url)}&dpi=${dpi}&bgcolor=ffffff`;
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+  // Show the QR code preview
+  const qrImage = document.getElementById('qrImage');
+  const qrPreview = document.getElementById('qrPreview');
+  const saveButton = document.getElementById('saveButton');
 
-  const { name, target_url, dpi } = req.body;
+  qrImage.src = qrUrl;
+  saveButton.href = qrUrl;
+  qrPreview.style.display = 'block';
 
-  if (!name || !target_url || !dpi) {
-    return res.status(400).json({ error: 'Missing fields' });
-  }
+  // Save to Supabase
+  const { createClient } = supabase;
+  const supabaseUrl = 'https://jdtkyapuzowluikcwixg.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkdGt5YXB1em93bHVpa2N3aXhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5OTkxMzMsImV4cCI6MjA2NjU3NTEzM30.ZCb4XlRZvVUv2VbtOB-xDFk3gTSFGaQLAMCt5VVs1JA'; // Replace with real one
+  const db = createClient(supabaseUrl, supabaseKey);
 
-  const { data, error } = await supabase
-    .from('qr_codes') // Your actual table name
-    .insert([{ name, target_url, dpi }]);
+  const { data, error } = await db
+    .from('qr_codes')
+    .insert([{ name, target_url, dpi, image_format: 'png' }]);
 
   if (error) {
-    return res.status(500).json({ error: error.message });
+    console.error('Error saving to Supabase:', error.message);
   }
-
-  res.status(200).json({ success: true, data });
-}
+});
