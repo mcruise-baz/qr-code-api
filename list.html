@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Saved QR Codes</title>
+</head>
+<body>
+  <h1>Saved QR Codes</h1>
+  <div id="qrList">Loading...</div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const supabaseUrl = 'https://jdtkyapuzowluikcwixg.supabase.co';
+    const supabaseKey = 'YOUR_ANON_KEY_HERE'; // <-- Replace this
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    async function loadQRCodes() {
+      const { data, error } = await supabase.from('qr_codes').select('*').order('created_at', { ascending: false });
+
+      if (error) {
+        document.getElementById('qrList').innerText = 'Error loading QR codes.';
+        console.error(error);
+        return;
+      }
+
+      const listEl = document.getElementById('qrList');
+      listEl.innerHTML = '';
+
+      data.forEach(qr => {
+        const imgUrl = `/api/qr?code=${qr.slug}&dpi=${qr.dpi}&bgcolor=ffffff`;
+        listEl.innerHTML += `
+          <div style="margin-bottom: 30px;">
+            <h3>${qr.name}</h3>
+            <p>Link: <a href="${qr.target_url}" target="_blank">${qr.target_url}</a></p>
+            <img src="${imgUrl}" style="width: 200px;" />
+          </div>
+        `;
+      });
+    }
+
+    loadQRCodes();
+  </script>
+</body>
+</html>
