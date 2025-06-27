@@ -1,45 +1,34 @@
-import { createClient } from '@supabase/supabase-js';
-import QRCode from 'qrcode';
+import { createClient } from '@supabase/supabase-js'
+import QRCode from 'qrcode' // Assuming you’re using this lib
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
-);
+)
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).send('Only POST supported');
-  }
+  const code = req.query.code || 'no-code'
+  const dpi = req.query.dpi === '300' ? 300 : 72
 
-  const { target_url, dpi = 72, image_format = 'png', slug } = req.body;
+  // 🧠 1. Log to Supabase
+  await supabase.from('qr_codes').insert([{ code, dpi }])
 
-  if (!target_url) {
-    return res.status(400).json({ error: 'target_url is required' });
-  }
-
-  // Save to Supabase
-  const { data, error } = await supabase
-    .from('qr_codes')
-    .insert([{ target_url, dpi, image_format, slug, is_active: true }])
-    .select()
-    .single();
-
-  if (error) {
-    return res.status(500).json({ error: error.message });
-  }
-
-  // Generate QR code
+  // 🎨 2. Generate QR Code PNG Buffer
   try {
-    const qr = await QRCode.toDataURL(target_url, {
-      width: dpi === 300 ? 1000 : 300, // 300dpi = ~1000px, 72dpi = ~300px
-    });
+    const qrImage = await QRCode.toBuffer(code, {
+      width: dpi === 300 ? 1000 : 300,
+      margin: 1,
+      color: {
+        dark: '#000',
+        light: '#0000' // Transparent
+      }
+    })
 
-    const img = Buffer.from(qr.split(',')[1], 'base64');
-
-    res.setHeader('Content-Type', 'image/png');
-    res.setHeader('Content-Disposition', `inline; filename="${slug || 'qr'}.png"`);
-    return res.send(img);
-  } catch (err) {
-    return res.status(500).json({ error: 'QR generation failed' });
+    // 📨 3. Send response
+    res.setHeader('Content-Type', 'image/png')
+    res.status(200).send(qrImage)
+  } catch (error) {
+    console.error('QR Code Generation Error:', error)
+    res.status(500).json({ error: 'Failed to generate QR code' })
   }
 }
