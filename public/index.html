@@ -31,29 +31,30 @@
   <h3>Preview:</h3>
   <img id="qrImage" src="" alt="QR Code" style="max-width:300px;" />
   <br>
-  <a id="downloadBtn" download="qr-code.png" style="display:none; margin-top:10px; background:#000; color:#fff; padding:10px; text-decoration:none;">Download QR Code</a>
+  <a id="saveButton" download="qr-code.png" style="display:none; margin-top:10px; background:#000; color:#fff; padding:10px; text-decoration:none;">Download QR Code</a>
 </div>
-  
+
 <div id="message"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   // Initialize Supabase client
   const supabaseUrl = 'https://jdtkyapuzowluikcwixg.supabase.co';
-  const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkdGt5YXB1em93bHVpa2N3aXhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5OTkxMzMsImV4cCI6MjA2NjU3NTEzM30.ZCb4XlRZvVUv2VbtOB-xDFk3gTSFGaQLAMCt5VVs1JA';
+  const supabaseAnonKey = 'YOUR-ANON-KEY-HERE';
+
   const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
   const form = document.getElementById('qrForm');
   const qrPreview = document.getElementById('qrPreview');
   const qrImage = document.getElementById('qrImage');
-  const downloadBtn = document.getElementById('downloadBtn');
-  const messageDiv = document.getElementById('message');
+  const saveButton = document.getElementById('saveButton');
+  const message = document.getElementById('message');
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    messageDiv.textContent = '';
 
-    const name = form.name.value.trim();
-    const target_url = form.target_url.value.trim();
+    const name = form.name.value;
+    const target_url = form.target_url.value;
     const dpi = form.dpi.value;
 
     // Insert into Supabase
@@ -62,27 +63,26 @@
       .insert([{ name, target_url, dpi }]);
 
     if (error) {
-      messageDiv.style.color = 'red';
-      messageDiv.textContent = 'Error creating QR code: ' + error.message;
+      message.textContent = 'Error creating QR code: ' + error.message;
+      message.style.color = 'red';
+      qrPreview.style.display = 'none';
       return;
     }
 
-    messageDiv.style.color = 'green';
-    messageDiv.textContent = 'QR code created successfully!';
+    message.textContent = 'QR code created successfully!';
+    message.style.color = 'green';
 
-    // Reset form
-    form.reset();
-
-    // Generate QR code URL (your Vercel API endpoint)
+    // Generate QR code URL
     const qrUrl = `/api/qr?code=${encodeURIComponent(target_url)}&dpi=${dpi}&bgcolor=ffffff`;
 
-    // Show preview and download button
+    // Show preview and download link
     qrImage.src = qrUrl;
-    downloadBtn.href = qrUrl;
+    saveButton.href = qrUrl;
+    saveButton.style.display = 'inline-block';
     qrPreview.style.display = 'block';
-    downloadBtn.style.display = 'inline-block';
+
+    form.reset();
   });
 </script>
-
 </body>
 </html>
