@@ -13,17 +13,26 @@
     URL:<br>
     <input type="url" name="target_url" required />
   </label><br>
-  <lbael>
+  
+  <label>
     DPI:<br>
     <select name="dpi" required>
       <option value="72">Digital</option>
       <option value="300">Print</option>
     </select>
-  </lbael><br/>
-  
-  <button type="submit">Create</button>
+  </label><br/>
+
+  <button type="submit">Create QR Code</button>
 </form>
 
+<!-- Preview and Save -->
+<div id="qrPreview" style="margin-top:20px; display:none;">
+  <h3>Preview:</h3>
+  <img id="qrImage" src="" alt="QR Code" style="max-width:300px;" />
+  <br>
+  <a id="saveButton" download="qr-code.png" style="display:inline-block; margin-top:10px; background:#000; color:#fff; padding:10px; text-decoration:none;">Download QR Code</a>
+</div>
+  
 <div id="message"></div>
 
   <script>
