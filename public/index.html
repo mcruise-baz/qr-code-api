@@ -1,3 +1,4 @@
+<html>
 <head>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -55,4 +56,31 @@
   });
 </script>
 
+  <script>
+document.getElementById("qr-form").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const name = document.getElementById("qr-name").value;
+  const target_url = document.getElementById("qr-link").value;
+
+  const response = await fetch("/api/create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name, target_url })
+  });
+
+  const result = await response.json();
+
+  if (response.ok) {
+    alert("QR Code saved to database!");
+    // Optional: Redirect or clear form
+  } else {
+    alert("Error: " + result.error);
+  }
+});
+</script>
+
 </body>
+</html>
